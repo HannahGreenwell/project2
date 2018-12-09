@@ -10,6 +10,8 @@ class UsersController < ApplicationController
 
     if user.persisted?
       session[:user_id] = user.id
+      
+      # Gives access to the user id in app/channels/application_cable/connection.rb
       cookies.signed[:user_id] = session[:user_id]
       redirect_to root_path
     else
