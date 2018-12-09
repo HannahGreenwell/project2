@@ -1,29 +1,33 @@
-# HOW DO YOU DOODLE?
+# Project#2: How Do You Doodle?
+
+Skip the reading and go straight to a live version of the site here: [https://whichdoodle.herokuapp.com/](https://whichdoodle.herokuapp.com/)
 
 ### Description
-A web game with 2 player multiplayer. A player is assigned as a drawer who draws an image of a randomly assigned word. A guesser will try and guess the word within the time limit. Use either your cursor or a Leap Motion to draw.
+An online, two-player drawing and guessing game (hmm... sounds a bit like Pictionary). One player is assigned the role of artist and can choose to either draw with the mouse or by simply wiggling their finger about in the air (if they are lucky enough to own a Leap Motion controller). The other player is assigned the role of guesser and can sit back and watch the drawer's sketch appear on their screen in real-time thanks to the magic of WebSockets. Once the excitement of the game is over, players can head to the gallery and check out their artworks.
 
 ### Features
-* Two player multiplayer. Each player can see the drawing as it is being drawn.
-* Draw on a canvas with either the mouse or Leap Motion.
-* View a gallery page of all images or sort by words.
-* Users can signup, login and change account details.
 
-### Built using
-* HTML/CSS
-* Canvas element in HTML5
-* JavaScript
-* jQuery
-* AJAX
-* Ruby
-* Ruby on Rails
-* Leap Motion controls with Leap.js
-* Web Sockets using ActionCable
 
+### Built With
+- HTML/CSS
+- HTML5 Canvas
+- JavaScript
+- jQuery
+- AJAX
+- Ruby on Rails
+- WebSockets using ActionCable
+- Leap Motion controls with Leap.js
+
+### Gems & APIs
+- Redis
+- bcrypt
+- Cloudinary
 
 ### Known Bugs
-* Guesser's drawing is sometimes out of sync when using the Leap Motion to draw.
 
-### Wishlist
-* Scoring system
-* Lightbox to display seperate images
+
+### To Do
+
+
+### Screenshot
+![How Do You Doodle Screenshot](https://i.imgur.com/v4MDyiA.jpg)
