@@ -1,24 +1,27 @@
-<%# This code is just for the guesser - the correct-guess checking code, which also sends an AJAX game over message %>
+<%# Canvas JS code only for the guesser %>
 
 <script>
-
+  // Global function needed in app/assets/javascripts/channels/games.js
   let gameOver;
 
   $(document).ready(function() {
 
+    // Action to take when the game finishes, called when the guesser
+    // correctly guesses the word or when the countdown timer set in
+    // games.js runs out
     gameOver = function(result) {
 
-      canvas.toBlob(function(blob){
-        // when the blob is ready:
+      // Create an image from the canvas
+      canvas.toBlob(function(blob) {
 
-        // make a new form object called fd
+        // Create a new form object named fd
         const fd = new FormData();
-        // append value to fd. If it doesn't exist, make a new key
+        // Append the blob to fd
         fd.append('drawingData', blob);
-        // this is the result of the game
+        // Append the result of the game to fd
         fd.append('result', result);
 
-        // ajax POST to games with the new fd data.
+        // Ajax POST to games#over with the new fd data
         $.ajax({
           type: "POST",
           url: "<%= game_over_path(@game) %>",
@@ -26,34 +29,44 @@
           processData: false,
           contentType: false
         })
-        .done(App.games.perform('game_over', {status: 'finished'})
+        // Broadcast a WebSocket message to games_channel.rb that the game has finished
+        .done(App.games.perform('game_over', { status: 'finished' })
         .fail(console.warn));
-      }); // canvas.toBlob
-    }; // gameOver
+      });
+    };
 
+    // Guess button click handler
     $('.guessButton').on('click', function() {
+      // Get the guesser's input
       const currentGuess = $('.guessField').val().toLowerCase();
 
+      // Check if the guesser guessed the word correctly
       if (currentWord === currentGuess) {
+        // Handle correct guess
+        // Disable guess button
         $('.guessButton').css({
           border: 'solid 2px #999',
           color: '#999',
           pointerEvents: 'none'
         });
-
+        // Tell the guesser they were correct
         $('.guessField').css({border: 'solid 2px green', color: 'green'}).val('CORRECT!');
 
+        // Call the gameOver function with a win
         gameOver('won');
       } else {
+        // Handle incorrect guess
+        // Tell the guesser to try again
         $('.guessField').css({border: 'solid 2px red', color: 'red'}).val('Try Again');
       }
 
       return false;
-    }); // guessButton click handler
+    });
 
+    // Guess text input focus event handler
     $('.guessField').on('focus', function() {
+      // Clear text when the guesser clicks inside the text field
       $(this).val('').css({border: 'solid 2px #999', color: 'black'})
-    })
-
+    });
   });
 </script>

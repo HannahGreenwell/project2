@@ -10,6 +10,7 @@ class UsersController < ApplicationController
 
     if user.persisted?
       session[:user_id] = user.id
+      cookies.signed[:user_id] = session[:user_id]
       redirect_to root_path
     else
       flash[:errors] = user.errors.full_messages
@@ -56,7 +57,6 @@ class UsersController < ApplicationController
   end
 
   private
-
   def user_params
     params.require(:user).permit(:name, :email, :password, :password_confirmation)
   end

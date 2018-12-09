@@ -1,24 +1,81 @@
-<%# This code is just for the drawer - the mouse event handlers that draw on the canvas %>
+<%# Canvas JS code only for the drawer - mouse event handlers that draw on the canvas %>
 
 <script src="/leap.js"></script>
 
 <script>
   $(document).ready(function() {
 
+    ///// MOUSE EVENTS /////
+
+    // mouse down event handler - draws a dot
+    $('#canvasElement').mousedown(event => {
+      // Get the x and y coordinates of the mouse event
+      const xPos = event.pageX;
+      const yPos = event.pageY;
+
+      // Invoke setPosition and drawOnClick methods in _canvas_js_common.html.erb
+      canvasApp.setPosition(xPos, yPos);
+      canvasApp.drawOnClick();
+
+      // Broadcast WebSocket message to games_channel.rb containing event type
+      // and x and y coordinates
+      App.games.perform('drawer_clicked', {event: 'click', position: {xPos: xPos, yPos: yPos}});
+    });
+
+    // mouse enter event handler - updates last know x and y coordinates
+    $('#canvasElement').mouseenter(event => {
+      // Get the x and y coordinates of the mouse event
+      const xPos = event.pageX;
+      const yPos = event.pageY;
+
+      // Invoke setPosition method in _canvas_js_common.html.erb
+      canvasApp.setPosition(xPos, yPos);
+
+      // Broadcast WebSocket message to games_channel.rb containing event type
+      // and x and y coordinates
+      App.games.perform('drawer_entered', {event: 'mouseenter', position: {xPos: xPos, yPos: yPos}});
+    });
+
+    // mouse move event handler  - draws a line
+    $('#canvasElement').mousemove(event => {
+      // Get the key pressed and x and y coordinates of the mouse event
+      const userInput = event.which;
+      const xPos = event.pageX;
+      const yPos = event.pageY;
+
+      // Invoke the drawOnMove method in _canvas_js_common.html.erb
+      canvasApp.drawOnMove(userInput, xPos, yPos);
+
+      // If the mouse's left click was pressed, broadcast a WebSocket message to
+      // games_channel.rb containing the event type, key pressed and x and y coordinates
+      if(userInput === 1) {
+        App.games.perform('drawer_moved', {event: 'mousemove', position: {xPos: xPos, yPos: yPos}, userInput: userInput});
+      }
+    });
+
+    // Clear Canvas button click handler
+    $('.clearButton').on('click', function() {
+      // Clear the drawer's canvas
+      canvasApp.clearCanvas();
+      // Broadcast a WebSocket message to games_channel.html.erb
+      // to clear the guesser's canvas
+      App.games.perform('clear_canvas', {clear: true});
+    });
+
+
+    ///// LEAP MOTION /////
     let outOfFrame = true;
     let isDrawing = false;
 
-    //LEAP BOX
     $('#cursor').css({
       top: offsetY,
       left: offsetX
     });
 
-     let controller = new Leap.Controller();
+    let controller = new Leap.Controller();
 
-     controller.on("frame", function(frame) {
-
-     if (frame.pointables.length > 0) {
+    controller.on("frame", function(frame) {
+      if (frame.pointables.length > 0) {
         //Get a pointable and normalize the tip position
         let pointable = frame.pointables[0];
         let interactionBox = frame.interactionBox;
@@ -36,13 +93,13 @@
           // we WERE out of frame, and now we're not
           canvasApp.setPosition(xPos, yPos);
           outOfFrame = false;
-          //send websocket position update
+          // Broadcast WebSocket message to games_channel.rb containing
+          // the type of event and x and y coordinates
           App.games.perform('drawer_entered', {
             event: 'mouseenter',
             position: {xPos, yPos}
           });
         }
-
 
         if (pointable.tipPosition[2] < 0) {
 
@@ -52,15 +109,18 @@
 
           canvasApp.drawOnMove(1, xPos, yPos);
 
+          // Broadcast WebSocket message to games_channel.rb containing
+          // the type of event, x and y coordinates and the key pressed
           App.games.perform('drawer_moved', {
             event: 'mousemove',
             position: {xPos, yPos},
             userInput: 1
           });
-
         } else {
           // not drawing, just showing cursor, setting pos
 
+          // Broadcast WebSocket message to games_channel.rb containing
+          // the type of event and x and y coordinates
           App.games.perform('drawer_entered', {
             event: 'mouseenter',
             position: {xPos, yPos}
@@ -71,9 +131,7 @@
           $('#cursor').css({
             opacity: 0.3,
           });
-
         } // not drawing
-
 
         // always show cursor if within frame
         $('#cursor').css({
@@ -81,62 +139,15 @@
           top: yPos - 25,
           left: xPos
         });
-
-
       } else {
         // no pointables, i.e. out of frame
         $('#cursor').hide();
         outOfFrame = true;
       }
-
     });
+
     controller.connect();
 
-
-    // mouse down draws a single circle and sets last known x,y pos as the clicked pos
-    $('#canvasElement').mousedown(event => {
-      const xPos = event.pageX;
-      const yPos = event.pageY;
-
-      canvasApp.setPosition(xPos, yPos);
-      canvasApp.drawOnClick();
-
-      App.games.perform('drawer_clicked', {event: 'click', position: {xPos: xPos, yPos: yPos}});
-    });
-
-    // mouse enter sets last known x,y pos as the entered pos
-    $('#canvasElement').mouseenter(event => {
-      const xPos = event.pageX;
-      const yPos = event.pageY;
-
-      canvasApp.setPosition(xPos, yPos);
-
-      App.games.perform('drawer_entered', {event: 'mouseenter', position: {xPos: xPos, yPos: yPos}});
-    });
-
-    // on mouse move draws a line from last known x,y to new x,y pos set in the drawOnMove function
-    $('#canvasElement').mousemove(event => {
-      const userInput = event.which;
-      const xPos = event.pageX;
-      const yPos = event.pageY;
-
-      canvasApp.drawOnMove(userInput, xPos, yPos);
-
-      // Only send a websockets message if the correct button was clicked
-      if(userInput === 1){
-        App.games.perform('drawer_moved', {event: 'mousemove', position: {xPos: xPos, yPos: yPos}, userInput: userInput});
-      }
-    });
-
-    // Clears the drawer's canvas and sends a websockets message
-    // to clear the guesser's canvas
-    $('.clearButton').on('click', function() {
-      canvasApp.clearCanvas();
-
-    App.games.perform('clear_canvas', {clear: true});
-   });
-
-   $('body').append("<div id='cursor'></div>")
-
-});
+    $('body').append("<div id='cursor'></div>")
+  });
 </script>

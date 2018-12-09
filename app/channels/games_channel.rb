@@ -29,15 +29,23 @@ class GamesChannel < ApplicationCable::Channel
     ActionCable.server.broadcast 'games', status: 'finished'
   end
 
-  # Handles message broadcast from
+  # Handles message broadcast from _canvas_js_common.html.erb.
+  # Broadcasts a message to games.js containing x and y coordinates
+  # and the event type (click)
   def drawer_clicked(data)
     ActionCable.server.broadcast 'games', event: data['event'], position: {xPos: data['position']['xPos'], yPos: data['position']['yPos']}
   end
 
+  # Handles message broadcast from _canvas_js_common.html.erb.
+  # Broadcasts a message to games.js containing x and y coordinates
+  # and the event type (mouseenter)
   def drawer_entered(data)
     ActionCable.server.broadcast 'games', event: data['event'], position: {xPos: data['position']['xPos'], yPos: data['position']['yPos']}
   end
 
+  # Handles message broadcast from _canvas_js_common.html.erb.
+  # Broadcasts a message to games.js containing x and y coordinates,
+  # the event type (mousemove), and the key pressed (userInput)
   def drawer_moved(data)
     ActionCable.server.broadcast 'games', event: data['event'], position: {xPos: data['position']['xPos'], yPos: data['position']['yPos']}, userInput: data['userInput']
   end

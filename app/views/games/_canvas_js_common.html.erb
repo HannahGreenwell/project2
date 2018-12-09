@@ -1,5 +1,7 @@
-<script>
+<%# Canvas JS code used both the drawer and the guesser %>
 
+<script>
+  // Global variables needed for WebSockets
   const currentGame = <%= @game.id %>;
   const currentWord = "<%= @game.word.word %>";
   const gameOverRedirectURL = "<%= game_result_path(@game) %>"
@@ -11,17 +13,72 @@
 
   $(document).ready(function() {
 
+    // Canvas set-up
     $('#canvasContainer').append("<canvas id='canvasElement'></canvas>");
     canvas = document.getElementById("canvasElement");
     ctx = canvas.getContext("2d");
 
+    // Canvas offset
     offsetX = $('#canvasElement').offset().left;
     offsetY = $('#canvasElement').offset().top;
 
+    // Canvas dimensions
     ctx.canvas.width = 880;
     ctx.canvas.height = 550;
 
-    // resize canvas when window is resized
+    canvasApp = {
+      // Last known x and y positions
+      pos: {
+        x: 0,
+        y: 0
+      },
+
+      // Update the last known x and y positions
+      setPosition: function(xPos, yPos) {
+        this.pos.x = xPos - offsetX;
+        this.pos.y = yPos - offsetY;
+      },
+
+      // Handle mousemove event - draws a line
+      drawOnMove: function(userInput, xPos, yPos) {
+        // Only draw on move if the left-click is also held down
+        if (userInput !== 1) return;
+
+        // Begin the drawing path
+        ctx.beginPath();
+        // Width of the line
+        ctx.lineWidth = 5;
+        // Rounded end cap
+        ctx.lineCap = "round";
+        // Starting coordinates of the line
+        ctx.moveTo(this.pos.x, this.pos.y);
+        // Update the last known x and y coordinates
+        this.setPosition(xPos, yPos);
+        // Ending coordinates of the line
+        ctx.lineTo(this.pos.x, this.pos.y);
+        // Draw the line
+        ctx.stroke();
+      },
+
+      // Handles a click event - draws a dot
+      drawOnClick: function() {
+        // Begin the drawing path
+        ctx.beginPath();
+        // Draw a circle/dot
+        ctx.arc(this.pos.x, this.pos.y, 0.5, 0, 2 * Math.PI);
+        // Fill in the circle
+        ctx.fill();
+        // Draw the circle/dot
+        ctx.stroke();
+      },
+
+      // Handles clear button click - clears the canvas
+      clearCanvas: function() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }; //canvasApp
+
+    // // Resize canvas when browser window is resized
     // function resizeWindow() {
     //   ctx.canvas.width = window.innerWidth;
     //   ctx.canvas.height = window.innerHeight;
@@ -29,59 +86,10 @@
     //   offsetY = $('#canvasElement').offset().top;
     // };
     // resizeWindow();
-
-    // last known x, y pos
-    canvasApp = {
-      pos: {
-        x: 0,
-        y: 0
-      },
-
-      setPosition: function(xPos, yPos) {
-        console.log(`setPosition:`, {xPos, yPos, offsetX, offsetY});
-        this.pos.x = xPos - offsetX;
-        this.pos.y = yPos - offsetY;
-      },
-
-      drawOnMove: function(userInput, xPos, yPos) {
-
-        if (userInput !== 1) return; //which === 1 when left click down
-
-        console.log(`drawOnMove:`, {userInput, xPos, yPos});
-        
-        ctx.beginPath(); // begin the drawing path
-
-        ctx.lineWidth = 5; // width of line
-        ctx.lineCap = "round"; // rounded end cap
-
-        ctx.moveTo(this.pos.x, this.pos.y); // from position
-        this.setPosition(xPos, yPos); // set new pos
-        ctx.lineTo(this.pos.x, this.pos.y); // to position
-
-        ctx.stroke(); // draw
-      },
-
-      // for initial click, draw a circle
-      drawOnClick: function() {
-        console.log(`drawOnClick:`);
-
-        ctx.beginPath();
-        ctx.arc(this.pos.x, this.pos.y, 0.5, 0, 2 * Math.PI); // draws circle
-        ctx.fill(); // fill circle
-        ctx.stroke();
-      },
-
-      clearCanvas: function() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-      }
-    }; //canvasApp
-
-    // change canvas to window height/width
+    //
     // $(window).resize(function() {
     //   resizeWindow();
     // });
 
   }); //document ready
-
-
 </script>

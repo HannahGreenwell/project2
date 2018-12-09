@@ -70,12 +70,21 @@ $(document).ready(function() {
         // Handles messages about the drawing and broadcasts to the guesser
         if(data.position && role === 'guesser') {
 
+          // Handles click events
           if(data.event === 'click') {
+            // Passes xPos and yPos from the socket message to setPosition and
+            // drawOnClick canvas methods in _canvas_js_common.html.erb
             canvasApp.setPosition(data.position.xPos, data.position.yPos);
             canvasApp.drawOnClick();
+          // Handles mouseenter event
           } else if (data.event === 'mouseenter') {
+            // Passes xPos and yPos from the socket message to setPosition
+            // method in _canvas_js_common.html.erb
             canvasApp.setPosition(data.position.xPos, data.position.yPos);
+          // Handles mousemove event
           } else {
+            // Passes xPos, yPos and the key pressed (userInput) from the
+            // socket message to drawOnMove method in _canvas_js_common.html.erb
             canvasApp.drawOnMove(data.userInput, data.position.xPos, data.position.yPos)
           }
         }
