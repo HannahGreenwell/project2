@@ -33,7 +33,8 @@ An online, two-player drawing and guessing game (hmmm... sounds a bit like Picti
 
 ### To Do
 - Handle games where a player leaves before it's finished
-- Add functionality to the gallery that shows details of the game/drawing
+- Show a drawing's details in the gallery
+- Allow users to add their own words
 - TESTING!
 
 
